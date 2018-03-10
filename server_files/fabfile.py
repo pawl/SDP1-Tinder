@@ -6,7 +6,7 @@ Prerequisites:
     Create DigitalOcean droplet with Django installation
     Copy server_files/fab_config_example.py to server_files/fab_config.py and edit in your settings
 
-If you're starting fresh, use command: fab all. 
+If you're starting fresh, use command: fab all.
 
 For detailed information on a specific command, use: fab -d <command>
 """
@@ -27,7 +27,7 @@ if not os.path.exists('fab_config.py'):
 
 try:
     from fab_config import (
-        DEFAULT_MODE, 
+        DEFAULT_MODE,
         DEFAULT_DEPLOY_TO,
         DEPLOYMENT_MODES,
         DEPLOYMENT_PRIVATE_FILES,
@@ -40,15 +40,15 @@ except ImportError, e:
     sys.exit()
 
 print """
-Default settings: 
-   - Deploying to %s host %s with mode %s. 
+Default settings:
+   - Deploying to %s host %s with mode %s.
    - Using private file %s.
    - Using branch %s
    - Django pass %s
 
 For a list of commands use: fab -l
 """ % (
-    DEFAULT_DEPLOY_TO, 
+    DEFAULT_DEPLOY_TO,
     DEPLOYMENT_HOSTS[DEFAULT_DEPLOY_TO],
     DEFAULT_MODE,
     os.path.join(LOCAL_DJANGO_PATH, DJANGO_PROJECT_NAME,
@@ -61,7 +61,7 @@ DJANGO_SETTINGS_MODULE = '%s.settings' % (DJANGO_PROJECT_NAME)
 ########### END DJANGO SETTINGS
 
 ########### PROMPT SETTINGS
-AUTO_ANSWER_PROMPTS = True  
+AUTO_ANSWER_PROMPTS = True
 if AUTO_ANSWER_PROMPTS:
     prompts = {
         'Do you want to continue [Y/n]? ': 'Y',
@@ -173,7 +173,7 @@ def setup(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, branch=DEFAULT_BRANCH)
         Restart nginx and gunicorn
         Run project using production settings (see app/settings/prod.py)
 
-        
+
     """
     env.hosts = DEPLOYMENT_HOSTS[deploy_to]
 
@@ -202,7 +202,7 @@ def setup(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, branch=DEFAULT_BRANCH)
             pass
 
         NPM_PACKAGES = (
-            'bower', 
+            'bower',
             )
         with settings(prompts=prompts, warn_only=True):
             for package in NPM_PACKAGES:
@@ -216,7 +216,7 @@ def setup(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, branch=DEFAULT_BRANCH)
         if not os.path.exists(DJANGO_PROJECT_PATH):
             with cd(DJANGO_PROJECT_DIR):
                 print 'Cloning Github Project into %s...' % (DJANGO_PROJECT_NAME)
-                run('git clone %s %s' % (GITHUB_PROJECT, DJANGO_PROJECT_NAME)) 
+                run('git clone %s %s' % (GITHUB_PROJECT, DJANGO_PROJECT_NAME))
         put_media(deploy_to=deploy_to)
 
         with cd(DJANGO_PROJECT_PATH):
@@ -228,7 +228,7 @@ def setup(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, branch=DEFAULT_BRANCH)
 
 def compile_messages(mode=DEFAULT_MODE):
     return
-    env_variables = _get_env_variables(mode=mode) 
+    env_variables = _get_env_variables(mode=mode)
     with shell_env(**env_variables):
         # with cd(DJANGO_PROJECT_PATH):
         #     run('django-admin makemessages -x js -l fr')
@@ -239,7 +239,7 @@ def compile_messages(mode=DEFAULT_MODE):
 
 def _update_permissions(debug=False, setup=False, only_static=False):
     """
-    An exhaustive fail-proof permission setup. I tried to give the least possible 
+    An exhaustive fail-proof permission setup. I tried to give the least possible
     permissions.
     """
     print 'Updating permissions'
@@ -265,13 +265,13 @@ def _update_permissions(debug=False, setup=False, only_static=False):
         sudo('chgrp -R staticusers %s' % (os.path.join(DJANGO_PROJECT_PATH, 'assets')))
         sudo('chgrp -R staticusers %s' % (os.path.join(DJANGO_PROJECT_PATH, 'media')))
 
-        with cd(DJANGO_PROJECT_PATH):    
+        with cd(DJANGO_PROJECT_PATH):
             # all files under the project dir are owned by django (gunicorn's uid) is the owner
             if not only_static:
                 sudo("chmod -R 500 .") # r-x --- --- : django can only read and execute files by default
                 with settings(warn_only=True):
                     sudo("chmod -R 700 app/migrations") # rwx --- --- : django can write new migrations
-            
+
             sudo("chmod -R 644 assets") # rw- r-- r-- : assets can be read by nginx (var-www) as well as everyone else
             sudo("chmod -R 644 media") # rw- r-- r--
 
@@ -285,14 +285,14 @@ def _update_permissions(debug=False, setup=False, only_static=False):
                 for f in blacklist:
                     sudo("chmod -R 000 %s" % (f))
 
-            sudo("find -type d -exec chmod a+x {} \;") # set all directories to executable            
+            sudo("find -type d -exec chmod a+x {} \;") # set all directories to executable
             run("ls -la")
 
             if debug:
                 with settings(warn_only=True):
                     env.user = 'django'
                     run('python manage.py runserver')
-        
+
 
 def update_permissions(deploy_to=DEFAULT_DEPLOY_TO, mode=DEFAULT_MODE, setup=False):
     _update_permissions(setup=setup)
@@ -306,7 +306,7 @@ def update_private_files(deploy_to=DEFAULT_DEPLOY_TO):
 def update_conf_files(deploy_to=DEFAULT_DEPLOY_TO, restart=True):
     """
     Updates private django settings file as well as .profile, nginx and gunicorn configs
-    
+
     Options
     -------
         deploy_to [DEFAULT_DEPLOY_TO]
@@ -349,7 +349,7 @@ def test_models(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO):
     Generate random data using app/management/comands/generate_models.py.
     """
     print '\nTesting models'
-    env_variables = _get_env_variables(mode=mode) 
+    env_variables = _get_env_variables(mode=mode)
     with cd(DJANGO_PROJECT_PATH):
         with shell_env(**env_variables):
             print '> Check database backend'
@@ -432,11 +432,11 @@ def migrate(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
                 run('python manage.py makemigrations')
 
                 if setup:
-                    run('python manage.py migrate --fake-initial') 
+                    run('python manage.py migrate --fake-initial')
                     run('python manage.py makemigrations app')
-                    run('python manage.py migrate app') 
+                    run('python manage.py migrate app')
                 elif reset_db:
-                    run('python manage.py migrate --fake')     
+                    run('python manage.py migrate --fake')
                     run('python manage.py makemigrations app')
                     run('python manage.py migrate --fake-initial')
                     run('python manage.py migrate')
@@ -446,12 +446,12 @@ def migrate(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
                 if generate_dummy_data or reset_db:
                     run('python manage.py generate_models 3 --reset')
             env.user = 'root'
-            
+
             if mode == 'prod':
                 print '> Checking postgresql status'
                 run('service postgresql status')
                 run('sudo netstat -nl | grep postgres')
-            
+
             print '> Creating super user with login admin/pass'
             with settings(warn_only=True):
                 with hide('stderr', 'stdout', 'warnings'):
@@ -466,7 +466,7 @@ def update_requirements(branch=DEFAULT_BRANCH):
     with cd(DJANGO_PROJECT_PATH):
         print 'Installing python requirements..'
         run('pip install -r requirements.txt')
-        
+
         print 'Installing bower requirements..'
         run('bower install --allow-root')
 
@@ -567,7 +567,7 @@ def collect_staticfiles(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO,
         _update_permissions(only_static=True, setup=setup)
         restart_nginx()
 
-def reboot(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None, 
+def reboot(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
     setup=False, reset_db=False, branch=DEFAULT_BRANCH):
     """
     Reboot server.
@@ -575,7 +575,7 @@ def reboot(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
     Prerequisites
     -------------
         fab setup
-    
+
     Overview
     -------------
         Update conf files (see update_conf_files)
@@ -601,9 +601,9 @@ def reboot(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
     """
     if not env_variables:
         env_variables = _get_env_variables(mode=mode, deploy_to=deploy_to)
-    
+
     with cd(DJANGO_PROJECT_PATH):
-        print 'Stopping gunicorn' 
+        print 'Stopping gunicorn'
         with settings(warn_only=True):
             run('service gunicorn stop')
 
@@ -613,10 +613,10 @@ def reboot(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
                 compile_messages(mode=mode)
                 run('python manage.py collectstatic')
         _update_permissions(only_static=True, setup=setup)
-        
+
         restart_nginx()
 
-        migrate(mode=mode, deploy_to=deploy_to, env_variables=env_variables, 
+        migrate(mode=mode, deploy_to=deploy_to, env_variables=env_variables,
             setup=setup, reset_db=reset_db)
 
         if mode == 'prod':
@@ -646,7 +646,7 @@ def get_media(deploy_to=DEFAULT_DEPLOY_TO):
     log_dir = os.path.join(LOCAL_DJANGO_PATH, 'server_files', 'media', deploy_to)
     if not os.path.exists(log_dir):
         local('mkdir -p %s' % (log_dir))
-    with settings(hide('warnings')): 
+    with settings(hide('warnings')):
         get(remote_path="%s/media" % (DJANGO_PROJECT_PATH), local_path="%s" % (log_dir))
 
 def put_media(deploy_to=DEFAULT_DEPLOY_TO):
@@ -658,11 +658,11 @@ def put_media(deploy_to=DEFAULT_DEPLOY_TO):
     remote_media_dir = os.path.join(DJANGO_PROJECT_PATH, 'media')
 
     with cd(DJANGO_PROJECT_PATH):
-        with settings(hide('warnings')): 
+        with settings(hide('warnings')):
             put(local_media_dir, remote_media_dir)
 
 def generate_models(n=3, mode=DEFAULT_MODE):
-    env_variables = _get_env_variables(mode=mode) 
+    env_variables = _get_env_variables(mode=mode)
     with shell_env(**env_variables):
         with cd(DJANGO_PROJECT_PATH):
             print 'Generating %i random app...' % (n)
@@ -674,22 +674,22 @@ def update_challenge_questions(deploy_to=DEFAULT_DEPLOY_TO, reset=False, mode=DE
     with cd(DJANGO_PROJECT_PATH):
         run('mkdir -p tmp')
     _write_file(
-        os.path.join(LOCAL_DJANGO_PATH, 'tmp/crypto_texts.csv'), 
+        os.path.join(LOCAL_DJANGO_PATH, 'tmp/crypto_texts.csv'),
         os.path.join(DJANGO_PROJECT_PATH, 'tmp/crypto_texts.csv'), {})
     _write_file(
-        os.path.join(LOCAL_DJANGO_PATH, 'app/management/commands/encrypter.py'), 
+        os.path.join(LOCAL_DJANGO_PATH, 'app/management/commands/encrypter.py'),
         os.path.join(DJANGO_PROJECT_PATH, 'app/management/commands/encrypter.py'), {})
-    env_variables = _get_env_variables(mode=mode) 
+    env_variables = _get_env_variables(mode=mode)
     with cd(DJANGO_PROJECT_PATH):
         with shell_env(**env_variables):
             if reset:
                 run('python manage.py generate_challenges tmp/crypto_texts.csv --reset')
             else:
-                run('python manage.py generate_challenges tmp/crypto_texts.csv')                
+                run('python manage.py generate_challenges tmp/crypto_texts.csv')
 
 def get_fixtures(deploy_to=DEFAULT_DEPLOY_TO, mode=DEFAULT_MODE):
     from datetime import datetime
-    env_variables = _get_env_variables(mode=mode) 
+    env_variables = _get_env_variables(mode=mode)
     apps = ('app', 'event')
     for app in apps:
         fixture_path = '%s/fixtures/%s-data-%s.json' % (
@@ -701,7 +701,7 @@ def get_fixtures(deploy_to=DEFAULT_DEPLOY_TO, mode=DEFAULT_MODE):
         log_dir = os.path.join(LOCAL_DJANGO_PATH, 'server_files', 'fixtures', deploy_to)
         if not os.path.exists(log_dir):
             local('mkdir -p %s' % (log_dir))
-        with settings(hide('warnings')): 
+        with settings(hide('warnings')):
             get(remote_path="%s/%s" % (DJANGO_PROJECT_PATH, fixture_path), local_path="%s" % (log_dir))
 
 def get_logs(deploy_to=DEFAULT_DEPLOY_TO):
@@ -712,7 +712,7 @@ def get_logs(deploy_to=DEFAULT_DEPLOY_TO):
     log_dir = os.path.join(LOCAL_DJANGO_PATH, 'server_files', 'logs', deploy_to)
     if not os.path.exists(log_dir):
         local('mkdir -p %s' % (log_dir))
-    with settings(hide('warnings')): 
+    with settings(hide('warnings')):
         get(remote_path="/var/log/nginx/error.log", local_path="%s/nginx.error.log" % (log_dir))
         get(remote_path="/var/log/nginx/access.log", local_path="%s/nginx.access.log" % (log_dir))
 

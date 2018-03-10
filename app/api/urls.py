@@ -1,8 +1,8 @@
 from django.conf.urls import patterns, url
 from app.api import handlers
- 
-urlpatterns = patterns('',
-    # url(r'^$', views.index, name='index'),
+
+urlpatterns = patterns(
+    '',
     url(r'^users/$', handlers.UserProfileList.as_view(), name='user-list'),
     url(r'^users/(?P<pk>\d+)/$', handlers.UserProfileDetail.as_view(), name='user-detail'),
     url(r'^swipes/$', handlers.SwipeActionDetail.as_view(), name='swipe-action-list'),
@@ -13,7 +13,4 @@ urlpatterns = patterns('',
     url(r'^stats/swipes/percentage/$', handlers.UserSwipeStats.as_view(), {'is_percentage': True}, name='swipe-stats'),
     url(r'^stats/swipes/$', handlers.UserSwipeStats.as_view(), name='swipe-stats'),
     url(r'^stats/votes/$', handlers.UserVoteStats.as_view(), name='vote-stats'),
-
-    # url(r'stats/(?P<event_pk>\d+)/$', handlers.stats),
-    # url(r'events/(?P<event_pk>\d+)/$', handlers.event_list),
-) 
+)

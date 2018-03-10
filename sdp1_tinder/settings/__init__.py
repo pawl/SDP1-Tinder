@@ -36,11 +36,11 @@ for module_name in modules:
     try:
         module = getattr(__import__(current, globals(), locals(), [module_name]), module_name)
     except ImportError, e:
-        print 'ERROR: Unable to import %s configuration: %s' % (module_name, e)
+        print('ERROR: Unable to import %s configuration: %s' % (module_name, e))
         raise
     except AttributeError, e:
         if env == 'dev':
-            print 'WARNING: Unable to import %s dev configuration: does %s.py exist?' % (module_name, module_name)
+            print('WARNING: Unable to import %s dev configuration: does %s.py exist?' % (module_name, module_name))
         else:
             raise
 
@@ -53,4 +53,4 @@ for module_name in modules:
             module_settings[setting] = getattr(module, setting)
     deep_update(module_settings, locals())
 
-# print 'Locals from settings.__init__:', locals()['LOCALE_PATHS'] # for debugging
+# print('Locals from settings.__init__:', locals()['LOCALE_PATHS']) # for debugging

@@ -11,7 +11,7 @@ if __name__ == "__main__":
     if settings.DEBUG:
         error_code = os.system("sass static/stylesheets/scss/myTinder.scss static/stylesheets/css/myTinder.css")
         if error_code > 0:
-            print "Warning: Failed to compile SCSS files. Make sure you have LESS CSS installed."
+            print("Warning: Failed to compile SCSS files. Make sure you have LESS CSS installed.")
 
     from django.core.management import execute_from_command_line
 

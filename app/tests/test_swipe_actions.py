@@ -8,12 +8,12 @@ from rest_framework.test import APIRequestFactory
 
 
 class SwipeActionTestCase(TestCase):
-    
+
     def test_swipe_action_updates_user_profile(self):
         """
         UserProfile num_right_swipes and num_left_swipes are updated when swiped.
         """
-        print '*' * 100
+        print('*' * 100)
         users = [create_user_profile() for i in range(3)]
         self.assertEqual(UserProfile.objects.count(), 3)
 
@@ -34,7 +34,7 @@ class SwipeActionTestCase(TestCase):
         users = UserProfile.objects.all()
 
     for i, user in enumerate(users):
-            print i, 'USER NUMBER', user.pk
+            print(i, 'USER NUMBER', user.pk)
             if user.pk == user_pks[0]:
                 expected_right_swipes = 1
                 expected_left_swipes = 0

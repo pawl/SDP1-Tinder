@@ -1,8 +1,8 @@
-from django.db.models import Count
-from django.db.models.signals import post_save, pre_save, post_delete
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from app.models import UserProfile, SwipeAction
+from app.models import SwipeAction
+
 
 @receiver(post_save, sender=SwipeAction)
 def update_user_profile_num_swipes(sender, instance, created=False, **kwargs):

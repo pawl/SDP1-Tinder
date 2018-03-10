@@ -1,6 +1,8 @@
+import random
+
 from django.views import generic
 from app.models import UserProfile, Event
-from django.http import HttpResponse, HttpResponseNotFound, Http404
+from django.http import Http404
 
 
 class IndexView(generic.ListView):
@@ -18,15 +20,13 @@ class IndexView(generic.ListView):
     def get_queryset(self, **kwargs):
         participants = list(self.get_event().participants.all())
         # randomize participants
-        import random
-        result = random.shuffle(participants)
-        print len(participants)
+        random.shuffle(participants)
         return participants
+
 
 class StatsView(generic.TemplateView):
     template_name = 'app/stats.html'
 
     # def get_context_object(self, *args, **kwargs):
     #     context = super(StatsView, self).get_context_data(**kwargs)
-    #     context['swipes'] = 
-
+    #     context['swipes'] =

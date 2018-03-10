@@ -1,8 +1,6 @@
-from django.http import HttpResponse, HttpResponseNotFound
-from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, HttpResponseNotFound, Http404
 
 from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,6 +11,7 @@ from rest_framework.decorators import api_view
 from app.models import UserProfile, SwipeAction, Event
 from app.serializers import UserProfileSerializer, SwipeActionSerializer
 
+
 def get_active_event():
     active_events = Event.objects.filter(is_active=True)
     if active_events.count() == 0:
@@ -20,14 +19,17 @@ def get_active_event():
     else:
         return active_events.first()
 
+
 class JSONResponse(HttpResponse):
     """
     An HttpResponse that renders its content into JSON.
     """
+
     def __init__(self, data, **kwargs):
         content = JSONRenderer().render(data)
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
+
 
 @api_view(('GET',))
 def api_root(request, format=None):
@@ -40,28 +42,33 @@ def api_root(request, format=None):
         # 'stats': reverse('stats', request=request, format=format)
     })
 
+
 class UserVoteStats(APIView):
     """
     List stats pertaining to user votes
     """
+
     def get(self, request, format=None):
         event = get_active_event()
         users = event.participants.order_by('-num_votes', 'first_name').all()
         series = []
         for i, user in enumerate(users):
             datapoint = {
-                'name': user.full_name(), 
+                'name': user.full_name(),
                 'y': user.get_num_votes(event=event)
-                }
+            }
             if i == 0:
                 datapoint['selected'] = True
             series.append(datapoint)
-        return Response({'series': series })
+
+        return Response({'series': series})
+
 
 class UserSwipeStats(APIView):
     """
     List stats pertaining to user votes
     """
+
     def get(self, request, is_percentage=False, format=None):
         event = get_active_event()
         users = event.participants.order_by('-num_right_swipes', 'num_left_swipes', 'first_name').all()
@@ -98,10 +105,12 @@ class UserSwipeStats(APIView):
         }
         return Response(data)
 
+
 class UserProfileList(APIView):
     """
     List all users, or create a new user.
     """
+
     def get(self, request, format=None):
         users = UserProfile.objects.all()
         serializer = UserProfileSerializer(users, many=True)
@@ -114,10 +123,12 @@ class UserProfileList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class UserProfileDetail(APIView):
     """
     Retrieve, update or delete a snippet instance.
     """
+
     def get_object(self, pk):
         try:
             return UserProfile.objects.get(pk=pk)
@@ -142,14 +153,14 @@ class UserProfileDetail(APIView):
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class SwipeActionOnUser(APIView):
-        
+
     def post(self, request, format=None, **kwargs):
 
         is_right = kwargs.get('is_right', None)
         is_vote = kwargs.get('is_vote', False)
         user_pk = self.kwargs.get('uid', None)
-
 
         active_events = Event.objects.filter(is_active=True)
         if active_events.count() == 0:
@@ -168,7 +179,7 @@ class SwipeActionOnUser(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            print 'serializer invalid!', serializer.errors
+            print('serializer invalid!', serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, format=None, **kwargs):
@@ -177,10 +188,12 @@ class SwipeActionOnUser(APIView):
         serializer = SwipeActionSerializer(swipes, many=True)
         return Response(serializer.data)
 
+
 class SwipeActionList(APIView):
     """
     List all users, or create a new user.
     """
+
     def get(self, request, format=None):
         swipes = SwipeAction.objects.all()
         serializer = SwipeActionSerializer(swipes, many=True)
@@ -193,10 +206,12 @@ class SwipeActionList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class SwipeActionDetail(APIView):
     """
     Retrieve, update or delete a snippet instance.
     """
+
     def get_object(self, user_pk):
         try:
             return SwipeAction.objects.get(pk=user_pk)

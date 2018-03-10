@@ -2,11 +2,12 @@ from rest_framework import serializers
 
 from app.models import UserProfile, SwipeAction, Event
 
+
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = (
-            'category', 
+            'category',
             'first_name',
             'last_name',
             'gender',
@@ -16,23 +17,25 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'num_votes',
             'num_views',
             'picture',
-            )
+        )
+
 
 class SwipeActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = SwipeAction
         fields = (
-            'on_user', 
+            'on_user',
             'is_right',
             'is_vote',
             'event',
-            )
+        )
+
 
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = (
-            'participants', 
+            'participants',
             'name',
             'is_active',
-            )
+        )
