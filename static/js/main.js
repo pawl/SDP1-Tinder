@@ -105,15 +105,7 @@
             animationSpeed: 400,
             threshold: 1,
             likeSelector: '.like',
-            dislikeSelector: '.dislike',
-
-            // jTinder infinite
-            onImageLoading: null,
-            beforeNextLoaded: null,
-            onNextLoaded: null,
-            loadNextThreshold: 5,
-            nextSelector: null,
-            itemSelector: '.infinite-item'
+            dislikeSelector: '.dislike'
         });
 
         /**

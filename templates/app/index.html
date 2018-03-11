@@ -22,9 +22,9 @@
         <div id="tinderslide">
             <ul>
             {% for image in images %}
-                <li class="pane pane{{ forloop.counter }} infinite-item" data-image-id="{{ image.id }}" data-name="{{ image.name }}">
+                <li class="pane pane{{ forloop.counter }}" data-image-id="{{ image.id }}" data-name="{{ image.name }}">
                     {% if image.file %}
-                    <div class="img" lazySrc="{% static image.file.url %}"></div>
+                    <div class="img" style="background:url('{% static image.file.url %}') no-repeat scroll center center; background-size: cover;"></div>
                     {% else %}
                     <div class="img" style="background:#eee;"></div>
                     {% endif %}
@@ -37,6 +37,8 @@
                 </li>
             {% endfor %}
             </ul>
+            <!-- <ul class="discarded">
+            </ul> -->
         </div>
         <!-- end jtinder container -->
     </div>
