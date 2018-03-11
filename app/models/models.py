@@ -56,7 +56,7 @@ class UserProfile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def full_name(self):
-        full_name = u'%s %s' % (
+        full_name = '%s %s' % (
             self.first_name.encode('utf-8'),
             self.last_name.encode('utf-8')
         )
@@ -112,8 +112,8 @@ class UserProfile(models.Model):
 
     def __unicode__(self):
         try:
-            print(type(self.full_name()))
-            print(self.full_name())
+            print((type(self.full_name())))
+            print((self.full_name()))
             self.full_name()
             # return 'yo'
             return self.full_name().decode('utf-8')

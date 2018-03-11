@@ -22,7 +22,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 LOCAL_DJANGO_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DJANGO_PROJECT_NAME = 'sdp1_tinder'
 if not os.path.exists('fab_config.py'):
-    print 'Please create a fab_config.py file, see fab_config_example.py'
+    print('Please create a fab_config.py file, see fab_config_example.py')
     sys.exit()
 
 try:
@@ -34,12 +34,12 @@ try:
         DEPLOYMENT_HOSTS,
         DEFAULT_BRANCH,
         DJANGO_PASS)
-except ImportError, e:
+except ImportError as e:
     print(e)
     print('Please update fab_config.py, see fab_config_example.py')
     sys.exit()
 
-print """
+print(("""
 Default settings:
    - Deploying to %s host %s with mode %s.
    - Using private file %s.
@@ -54,7 +54,7 @@ For a list of commands use: fab -l
     os.path.join(LOCAL_DJANGO_PATH, DJANGO_PROJECT_NAME,
             'settings', DEPLOYMENT_PRIVATE_FILES[DEFAULT_DEPLOY_TO] + '.py'),
     DEFAULT_BRANCH,
-    DJANGO_PASS)
+    DJANGO_PASS)))
 
 ########### DJANGO SETTINGS
 DJANGO_SETTINGS_MODULE = '%s.settings' % (DJANGO_PROJECT_NAME)
@@ -104,7 +104,7 @@ def _write_file(local_path, remote_path, options):
     with open(local_path) as f:
         content = f.read()
 
-    for option_name, option_value in options.iteritems():
+    for option_name, option_value in options.items():
         content = content.replace(option_name, option_value)
 
     #  tmp = tempfile.TemporaryFile()
@@ -112,7 +112,7 @@ def _write_file(local_path, remote_path, options):
     with open(TMP_PATH, 'w') as tmp:
         tmp.write(content)
 
-    print 'Overwriting %s' % (remote_path)
+    print(('Overwriting %s' % (remote_path)))
     put(TMP_PATH, remote_path)
 
 def install_packages(deploy_to=DEFAULT_DEPLOY_TO):
@@ -136,8 +136,8 @@ def install_packages(deploy_to=DEFAULT_DEPLOY_TO):
     with settings(prompts=prompts):
         # Require some Debian/Ubuntu packages
         for package in packages:
-            print '=' * 20
-            print package
+            print(('=' * 20))
+            print(package)
             sudo('apt-get install %s' % (package))
         sudo('pip install psycopg2')
 
@@ -206,16 +206,16 @@ def setup(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, branch=DEFAULT_BRANCH)
             )
         with settings(prompts=prompts, warn_only=True):
             for package in NPM_PACKAGES:
-                print 'Installing %s as root...' % (package)
+                print(('Installing %s as root...' % (package)))
                 sudo('npm install -g %s' % (package))
 
 
-        print 'Making django project directory at %s...' % (DJANGO_PROJECT_DIR)
+        print(('Making django project directory at %s...' % (DJANGO_PROJECT_DIR)))
         run('mkdir -p %s' % (DJANGO_PROJECT_DIR))
 
         if not os.path.exists(DJANGO_PROJECT_PATH):
             with cd(DJANGO_PROJECT_DIR):
-                print 'Cloning Github Project into %s...' % (DJANGO_PROJECT_NAME)
+                print(('Cloning Github Project into %s...' % (DJANGO_PROJECT_NAME)))
                 run('git clone %s %s' % (GITHUB_PROJECT, DJANGO_PROJECT_NAME))
         put_media(deploy_to=deploy_to)
 
@@ -242,7 +242,7 @@ def _update_permissions(debug=False, setup=False, only_static=False):
     An exhaustive fail-proof permission setup. I tried to give the least possible
     permissions.
     """
-    print 'Updating permissions'
+    print('Updating permissions')
     with settings():
 
         with cd('/home'):
@@ -316,20 +316,20 @@ def update_conf_files(deploy_to=DEFAULT_DEPLOY_TO, restart=True):
     env.hosts = DEPLOYMENT_HOSTS[deploy_to]
     _update_private_settings_file(deploy_to=deploy_to)
 
-    print 'Modifying ~/.profile'
+    print('Modifying ~/.profile')
     _write_file('.profile', '.profile',
         {
             'DJANGO_PROJECT_PATH': DJANGO_PROJECT_PATH
         })
 
-    print 'Modifying nginx config'
+    print('Modifying nginx config')
     _write_file('nginx.sh', '/etc/nginx/sites-enabled/django',
         {
             'DJANGO_PROJECT_PATH': DJANGO_PROJECT_PATH,
             'DOMAIN_NAME': DOMAIN_NAME
         })
 
-    print 'Modifying gunicorn config'
+    print('Modifying gunicorn config')
     _write_file('gunicorn.sh', '/etc/init/gunicorn.conf',
         {
             'DJANGO_PROJECT_DIR': DJANGO_PROJECT_DIR,
@@ -337,25 +337,25 @@ def update_conf_files(deploy_to=DEFAULT_DEPLOY_TO, restart=True):
             'DJANGO_APP_NAME': DJANGO_APP_NAME
         })
     if restart:
-        print 'Restarting nginx'
+        print('Restarting nginx')
         sudo('nginx -t')
         sudo('service nginx reload')
 
-        print 'Restarting gunicorn'
+        print('Restarting gunicorn')
         run('service gunicorn restart')
 
 def test_models(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO):
     """
     Generate random data using app/management/comands/generate_models.py.
     """
-    print '\nTesting models'
+    print('\nTesting models')
     env_variables = _get_env_variables(mode=mode)
     with cd(DJANGO_PROJECT_PATH):
         with shell_env(**env_variables):
-            print '> Check database backend'
+            print('> Check database backend')
             run('echo "from django.db import connection;connection.vendor" | python manage.py shell ')
 
-            print '> Generate random apps'
+            print('> Generate random apps')
             run('python manage.py generate_models 10 --reset')
 
 def _get_private_settings(deploy_to=DEFAULT_DEPLOY_TO):
@@ -396,7 +396,7 @@ def migrate(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
     if not env_variables:
         env_variables = _get_env_variables(mode=mode)
 
-    print '\nMigrating database as user django'
+    print('\nMigrating database as user django')
 
     with shell_env(**env_variables):
         with cd(DJANGO_PROJECT_PATH):
@@ -412,7 +412,7 @@ def migrate(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
             private_settings = _get_private_settings(deploy_to=deploy_to)
             django_db_pass = private_settings.DB_PASS
 
-            print '> Checking database backend'
+            print('> Checking database backend')
             with settings(prompts={
                 "Login password for 'django': ": django_db_pass}):
                 run('echo "from django.db import connection; connection.vendor" | python manage.py shell')
@@ -421,7 +421,7 @@ def migrate(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
             with settings(prompts={
                 "Login password for 'django': ": django_db_pass}):
                 if reset_db:
-                    print '> Deleting database'
+                    print('> Deleting database')
                     if mode == 'dev':
                         run('rm -rf %s/db.sqlite3' % (DJANGO_PROJECT_NAME))
                     else:
@@ -448,11 +448,11 @@ def migrate(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
             env.user = 'root'
 
             if mode == 'prod':
-                print '> Checking postgresql status'
+                print('> Checking postgresql status')
                 run('service postgresql status')
                 run('sudo netstat -nl | grep postgres')
 
-            print '> Creating super user with login admin/pass'
+            print('> Creating super user with login admin/pass')
             with settings(warn_only=True):
                 with hide('stderr', 'stdout', 'warnings'):
                     sudo('chmod u+x scripts/createsuperuser.sh')
@@ -462,12 +462,12 @@ def update_requirements(branch=DEFAULT_BRANCH):
     """
     Update pip and bower requirements
     """
-    print '\nUpdate pip and bower requirements'
+    print('\nUpdate pip and bower requirements')
     with cd(DJANGO_PROJECT_PATH):
-        print 'Installing python requirements..'
+        print('Installing python requirements..')
         run('pip install -r requirements.txt')
 
-        print 'Installing bower requirements..'
+        print('Installing bower requirements..')
         run('bower install --allow-root')
 
 def pull_changes(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, branch=DEFAULT_BRANCH,
@@ -488,7 +488,7 @@ def pull_changes(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, branch=DEFAULT_
     """
     _update_private_settings_file(deploy_to=deploy_to)
     with cd(DJANGO_PROJECT_PATH):
-        print '\nPulling changes from %s repo' % (branch)
+        print('\nPulling changes from %s repo' % (branch))
         run('git config --global core.filemode false')
         if False: #branch == 'stable':
             run('git fetch --all')
@@ -505,15 +505,15 @@ def pull_changes(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, branch=DEFAULT_
         restart_gunicorn()
 
 def _update_private_settings_file(deploy_to=DEFAULT_DEPLOY_TO):
-    print '\nUpdating private settings'
+    print('\nUpdating private settings')
     local_private_file = _get_private_settings_file(local=True, deploy_to=deploy_to)
     remote_private_file = _get_private_settings_file(local=False, deploy_to=deploy_to)
     put(local_path=local_private_file,remote_path=remote_private_file)
 
 def _get_private_settings_file(deploy_to=DEFAULT_DEPLOY_TO, local=True):
-    if deploy_to not in DEPLOYMENT_PRIVATE_FILES.keys():
-        print 'Unknown deployment option %s' % (deploy_to)
-        print 'Possible options:', DEPLOYMENT_PRIVATE_FILES.keys()
+    if deploy_to not in list(DEPLOYMENT_PRIVATE_FILES.keys()):
+        print('Unknown deployment option %s' % (deploy_to))
+        print('Possible options:', list(DEPLOYMENT_PRIVATE_FILES.keys()))
         sys.exit()
 
     basename = DEPLOYMENT_PRIVATE_FILES[deploy_to]
@@ -531,8 +531,8 @@ def _get_private_settings_file(deploy_to=DEFAULT_DEPLOY_TO, local=True):
 def _get_env_variables(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO):
     ev = dict(ENV_VARIABLES)
     if mode not in DEPLOYMENT_MODES:
-        print 'Invalid mode option %s' % (mode)
-        print 'Possible options:', DEPLOYMENT_MODES
+        print('Invalid mode option %s' % (mode))
+        print('Possible options:', DEPLOYMENT_MODES)
         sys.exit()
     ev['APP_ENV'] = mode
     env.hosts = DEPLOYMENT_HOSTS[deploy_to]
@@ -546,11 +546,11 @@ def hard_reboot(**kwargs):
     reboot(**kwargs)
 
 def restart_gunicorn():
-    print 'Restarting gunicorn'
+    print('Restarting gunicorn')
     run('service gunicorn restart')
 
 def restart_nginx():
-    print 'Restarting nginx'
+    print('Restarting nginx')
     sudo('nginx -t')
     sudo('service nginx restart')
 
@@ -603,7 +603,7 @@ def reboot(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
         env_variables = _get_env_variables(mode=mode, deploy_to=deploy_to)
 
     with cd(DJANGO_PROJECT_PATH):
-        print 'Stopping gunicorn'
+        print('Stopping gunicorn')
         with settings(warn_only=True):
             run('service gunicorn stop')
 
@@ -623,26 +623,26 @@ def reboot(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
 
             if deploy_to == 'alpha':
                 with shell_env(**env_variables):
-                    print 'Generating 3 random app...'
+                    print('Generating 3 random app...')
                     run('python manage.py generate_models 3')
 
-            print 'Restarting gunicorn'
+            print('Restarting gunicorn')
             run('service gunicorn restart')
             get_logs(deploy_to=deploy_to)
 
         elif mode == 'dev':
             get_logs(deploy_to=deploy_to)
             with shell_env(**env_variables):
-                print 'Running on localhost'
+                print('Running on localhost')
                 run('python manage.py runserver localhost:9000')
         else:
-            print 'Invalid mode %s' % (mode)
+            print('Invalid mode %s' % (mode))
 
 def get_media(deploy_to=DEFAULT_DEPLOY_TO):
     """
     Copy server's media folder
     """
-    print '\nCopying media to server_files/media/'
+    print('\nCopying media to server_files/media/')
     log_dir = os.path.join(LOCAL_DJANGO_PATH, 'server_files', 'media', deploy_to)
     if not os.path.exists(log_dir):
         local('mkdir -p %s' % (log_dir))
@@ -653,7 +653,7 @@ def put_media(deploy_to=DEFAULT_DEPLOY_TO):
     """
     Copy local media folder to server
     """
-    print '\nCopying media from local to server'
+    print('\nCopying media from local to server')
     local_media_dir = os.path.join(LOCAL_DJANGO_PATH, 'media')
     remote_media_dir = os.path.join(DJANGO_PROJECT_PATH, 'media')
 
@@ -665,12 +665,12 @@ def generate_models(n=3, mode=DEFAULT_MODE):
     env_variables = _get_env_variables(mode=mode)
     with shell_env(**env_variables):
         with cd(DJANGO_PROJECT_PATH):
-            print 'Generating %i random app...' % (n)
+            print('Generating %i random app...' % (n))
             run('python manage.py generate_models %i' % (n))
 
 def update_challenge_questions(deploy_to=DEFAULT_DEPLOY_TO, reset=False, mode=DEFAULT_MODE):
     # update csv in tmp
-    print os.path.join(LOCAL_DJANGO_PATH, 'tmp/crypto_texts.csv')
+    print(os.path.join(LOCAL_DJANGO_PATH, 'tmp/crypto_texts.csv'))
     with cd(DJANGO_PROJECT_PATH):
         run('mkdir -p tmp')
     _write_file(
@@ -708,7 +708,7 @@ def get_logs(deploy_to=DEFAULT_DEPLOY_TO):
     """
     Copy django, nginx and gunicorn log files from remote to server_files/logs
     """
-    print '\nCopying logs to server_files/logs/'
+    print('\nCopying logs to server_files/logs/')
     log_dir = os.path.join(LOCAL_DJANGO_PATH, 'server_files', 'logs', deploy_to)
     if not os.path.exists(log_dir):
         local('mkdir -p %s' % (log_dir))
@@ -726,7 +726,7 @@ def test():
     deploy_to=DEFAULT_DEPLOY_TO
     env_variables = _get_env_variables(mode='prod')
 
-    print '\nMigrating database as user django'
+    print('\nMigrating database as user django')
 
     with shell_env(**env_variables):
         with cd(DJANGO_PROJECT_PATH):

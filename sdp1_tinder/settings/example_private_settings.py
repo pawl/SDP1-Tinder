@@ -3,7 +3,7 @@ This file must be copied and renamed to private.py
 It contains sensitive / deployment-specific settings
 Do not make it public!
 """
-from __future__ import absolute_import
+
 import os
 from .common import SITE_NAME
 

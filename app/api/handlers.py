@@ -179,7 +179,7 @@ class SwipeActionOnUser(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            print('serializer invalid!', serializer.errors)
+            print(('serializer invalid!', serializer.errors))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, format=None, **kwargs):
