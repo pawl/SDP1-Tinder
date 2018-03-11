@@ -1,46 +1,28 @@
-from django.core.management.base import BaseCommand, CommandError
-from optparse import make_option
-from random import randint
+import os
 
-from app.tests.utils import create_event, create_user_profile
-from app.models import UserProfile, Event
+from django.conf import settings
+from django.core.management.base import BaseCommand
 
-from loremipsum import get_sentence, get_paragraph
+from app.models import Image
 
 
 class Command(BaseCommand):
-    args = 'numEvents numUsers [--reset]'
-    help = 'Create events and users using lorem ipsum generator'
-
-    option_list = BaseCommand.option_list + (
-        make_option(
-            '--reset',
-            action='store_true',
-            dest='reset',
-            default=False,
-            help='Delete all events and users before generating new ones.',
-        ),
-    )
+    help = 'Create images based on the media directory'
 
     def handle(self, *args, **options):
-        if len(args) != 2:
-            raise CommandError('Usage: {0}'.format(self.args))
+        Image.objects.all().delete()
 
-        if options['reset']:
-            UserProfile.objects.all().delete()
-            Event.objects.all().delete()
+        num_images = 0
 
-        try:
-            numEvents = int(args[0])
-            numUsers = int(args[1])
-            for i in range(numEvents):
-                create_event()
-            for i in range(numUsers):
-                create_user_profile()
-        except ValueError:
-            raise CommandError('Usage: you must pass a valid number.')
-        except Exception as e:
-            print(e)
-            raise CommandError('A vague error occured while generating notes')
+        # Get all files from the MEDIA_ROOT, recursively
+        media_root = getattr(settings, 'MEDIA_ROOT', None)
+        if media_root is not None:
+            images_root = os.path.join(media_root, 'images')
+            for relative_root, dirs, files in os.walk(images_root):
+                for file_ in files:
+                    # Compute the relative file path to the media directory, so it can be compared to the values from the db
+                    relative_file = os.path.join(os.path.relpath(relative_root, media_root), file_)
+                    Image.objects.create(name=file_, file=relative_file)
+                    num_images += 1
 
-        self.stdout.write('Successfully generated {0} events and {1} users'.format(numUsers, numEvents))
+        self.stdout.write('Successfully generated {0} images'.format(num_images))

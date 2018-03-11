@@ -11,11 +11,10 @@ If you're starting fresh, use command: fab all.
 For detailed information on a specific command, use: fab -d <command>
 """
 
-import fabtools
 from fabric.api import *
-from fabric.contrib.console import confirm
 from fabric.context_managers import shell_env
-import tempfile, os, sys
+import os
+import sys
 
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -51,8 +50,11 @@ For a list of commands use: fab -l
     DEFAULT_DEPLOY_TO,
     DEPLOYMENT_HOSTS[DEFAULT_DEPLOY_TO],
     DEFAULT_MODE,
-    os.path.join(LOCAL_DJANGO_PATH, DJANGO_PROJECT_NAME,
-            'settings', DEPLOYMENT_PRIVATE_FILES[DEFAULT_DEPLOY_TO] + '.py'),
+    os.path.join(
+        LOCAL_DJANGO_PATH, DJANGO_PROJECT_NAME,
+        'settings',
+        DEPLOYMENT_PRIVATE_FILES[DEFAULT_DEPLOY_TO] + '.py',
+    ),
     DEFAULT_BRANCH,
     DJANGO_PASS)))
 
@@ -70,7 +72,7 @@ if AUTO_ANSWER_PROMPTS:
         "Type 'yes' to continue, or 'no' to cancel: ": 'yes',
         '? May bower anonymously report usage statistics to improve the tool over time? (Y/n) ': 'Y',
         'Would you like to create one now? (yes/no): ': 'no'
-        }
+    }
 else:
     prompts = {}
 ########### END PROMPT SETTINGS
@@ -100,6 +102,7 @@ env.project_root = DJANGO_PROJECT_PATH
 env.colorize_errors = True
 ########### END FAB ENV
 
+
 def _write_file(local_path, remote_path, options):
     with open(local_path) as f:
         content = f.read()
@@ -115,23 +118,24 @@ def _write_file(local_path, remote_path, options):
     print(('Overwriting %s' % (remote_path)))
     put(TMP_PATH, remote_path)
 
+
 def install_packages(deploy_to=DEFAULT_DEPLOY_TO):
     env.hosts = DEPLOYMENT_HOSTS[deploy_to]
     run('apt-get update')
     packages = (
-            'git',
-            'npm',
-            # 'libpq-dev',
-            # 'python-dev',
-            'postgresql',
-            # 'libpq-dev python-dev',
-            'libpq-dev',
-            'nginx',
-            'gunicorn',
-            'sqlite3',
-            'node-less',
-            'gettext'
-        )
+        'git',
+        'npm',
+        # 'libpq-dev',
+        # 'python-dev',
+        'postgresql',
+        # 'libpq-dev python-dev',
+        'libpq-dev',
+        'nginx',
+        'gunicorn',
+        'sqlite3',
+        'node-less',
+        'gettext'
+    )
 
     with settings(prompts=prompts):
         # Require some Debian/Ubuntu packages
@@ -140,6 +144,7 @@ def install_packages(deploy_to=DEFAULT_DEPLOY_TO):
             print(package)
             sudo('apt-get install %s' % (package))
         sudo('pip install psycopg2')
+
 
 def setup(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, branch=DEFAULT_BRANCH):
     """
@@ -232,10 +237,11 @@ def compile_messages(mode=DEFAULT_MODE):
     with shell_env(**env_variables):
         # with cd(DJANGO_PROJECT_PATH):
         #     run('django-admin makemessages -x js -l fr')
-        # with cd(os.path.join(DJANGO_PROJECT_PATH, 'static', 'javascripts')):
+        # with cd(os.path.join(DJANGO_PROJECT_PATH, 'static', 'js')):
         #     run('django-admin makemessages -d djangojs -l fr')
         with cd(DJANGO_PROJECT_PATH):
             run('django-admin compilemessages')
+
 
 def _update_permissions(debug=False, setup=False, only_static=False):
     """
@@ -299,9 +305,11 @@ def update_permissions(deploy_to=DEFAULT_DEPLOY_TO, mode=DEFAULT_MODE, setup=Fal
     restart_nginx()
     restart_gunicorn()
 
+
 def update_private_files(deploy_to=DEFAULT_DEPLOY_TO):
     env.hosts = DEPLOYMENT_HOSTS[deploy_to]
     _update_private_settings_file(deploy_to=deploy_to)
+
 
 def update_conf_files(deploy_to=DEFAULT_DEPLOY_TO, restart=True):
     """
@@ -344,6 +352,7 @@ def update_conf_files(deploy_to=DEFAULT_DEPLOY_TO, restart=True):
         print('Restarting gunicorn')
         run('service gunicorn restart')
 
+
 def test_models(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO):
     """
     Generate random data using app/management/comands/generate_models.py.
@@ -358,11 +367,13 @@ def test_models(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO):
             print('> Generate random apps')
             run('python manage.py generate_models 10 --reset')
 
+
 def _get_private_settings(deploy_to=DEFAULT_DEPLOY_TO):
     private_file = _get_private_settings_file(deploy_to=DEFAULT_DEPLOY_TO, local=True)
     import imp
     private = imp.load_source('', private_file)
     return private
+
 
 def reset_db(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO):
     """
@@ -376,6 +387,7 @@ def reset_db(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO):
     with (hide('stdout')):
         pull_changes(mode=mode, deploy_to=deploy_to)
     migrate(mode=mode, deploy_to=deploy_to, reset_db=True)
+
 
 def migrate(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
     setup=False, reset_db=False, generate_dummy_data=True, create_super_user=True):
@@ -458,6 +470,7 @@ def migrate(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
                     sudo('chmod u+x scripts/createsuperuser.sh')
                     run('./scripts/createsuperuser.sh')
 
+
 def update_requirements(branch=DEFAULT_BRANCH):
     """
     Update pip and bower requirements
@@ -469,6 +482,7 @@ def update_requirements(branch=DEFAULT_BRANCH):
 
         print('Installing bower requirements..')
         run('bower install --allow-root')
+
 
 def pull_changes(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, branch=DEFAULT_BRANCH,
     collectstatic=False):
@@ -504,11 +518,13 @@ def pull_changes(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, branch=DEFAULT_
         collect_staticfiles(mode=mode, deploy_to=deploy_to)
         restart_gunicorn()
 
+
 def _update_private_settings_file(deploy_to=DEFAULT_DEPLOY_TO):
     print('\nUpdating private settings')
     local_private_file = _get_private_settings_file(local=True, deploy_to=deploy_to)
     remote_private_file = _get_private_settings_file(local=False, deploy_to=deploy_to)
     put(local_path=local_private_file,remote_path=remote_private_file)
+
 
 def _get_private_settings_file(deploy_to=DEFAULT_DEPLOY_TO, local=True):
     if deploy_to not in list(DEPLOYMENT_PRIVATE_FILES.keys()):
@@ -528,6 +544,7 @@ def _get_private_settings_file(deploy_to=DEFAULT_DEPLOY_TO, local=True):
             'settings', 'private.py')
     return private_file
 
+
 def _get_env_variables(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO):
     ev = dict(ENV_VARIABLES)
     if mode not in DEPLOYMENT_MODES:
@@ -538,6 +555,7 @@ def _get_env_variables(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO):
     env.hosts = DEPLOYMENT_HOSTS[deploy_to]
     return ev
 
+
 def hard_reboot(**kwargs):
     """
     Reboot server and reset database (see reboot)
@@ -545,17 +563,20 @@ def hard_reboot(**kwargs):
     kwargs["reset_db"] = True
     reboot(**kwargs)
 
+
 def restart_gunicorn():
     print('Restarting gunicorn')
     run('service gunicorn restart')
+
 
 def restart_nginx():
     print('Restarting nginx')
     sudo('nginx -t')
     sudo('service nginx restart')
 
+
 def collect_staticfiles(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO,
-        env_variables=None):
+                        env_variables=None):
     if not env_variables:
         env_variables = _get_env_variables(mode=mode, deploy_to=deploy_to)
 
@@ -567,8 +588,9 @@ def collect_staticfiles(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO,
         _update_permissions(only_static=True, setup=setup)
         restart_nginx()
 
+
 def reboot(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
-    setup=False, reset_db=False, branch=DEFAULT_BRANCH):
+           setup=False, reset_db=False, branch=DEFAULT_BRANCH):
     """
     Reboot server.
 
@@ -617,7 +639,7 @@ def reboot(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
         restart_nginx()
 
         migrate(mode=mode, deploy_to=deploy_to, env_variables=env_variables,
-            setup=setup, reset_db=reset_db)
+                setup=setup, reset_db=reset_db)
 
         if mode == 'prod':
 
@@ -638,6 +660,7 @@ def reboot(mode=DEFAULT_MODE, deploy_to=DEFAULT_DEPLOY_TO, env_variables=None,
         else:
             print('Invalid mode %s' % (mode))
 
+
 def get_media(deploy_to=DEFAULT_DEPLOY_TO):
     """
     Copy server's media folder
@@ -648,6 +671,7 @@ def get_media(deploy_to=DEFAULT_DEPLOY_TO):
         local('mkdir -p %s' % (log_dir))
     with settings(hide('warnings')):
         get(remote_path="%s/media" % (DJANGO_PROJECT_PATH), local_path="%s" % (log_dir))
+
 
 def put_media(deploy_to=DEFAULT_DEPLOY_TO):
     """
@@ -661,12 +685,14 @@ def put_media(deploy_to=DEFAULT_DEPLOY_TO):
         with settings(hide('warnings')):
             put(local_media_dir, remote_media_dir)
 
+
 def generate_models(n=3, mode=DEFAULT_MODE):
     env_variables = _get_env_variables(mode=mode)
     with shell_env(**env_variables):
         with cd(DJANGO_PROJECT_PATH):
             print('Generating %i random app...' % (n))
             run('python manage.py generate_models %i' % (n))
+
 
 def update_challenge_questions(deploy_to=DEFAULT_DEPLOY_TO, reset=False, mode=DEFAULT_MODE):
     # update csv in tmp
@@ -687,6 +713,7 @@ def update_challenge_questions(deploy_to=DEFAULT_DEPLOY_TO, reset=False, mode=DE
             else:
                 run('python manage.py generate_challenges tmp/crypto_texts.csv')
 
+
 def get_fixtures(deploy_to=DEFAULT_DEPLOY_TO, mode=DEFAULT_MODE):
     from datetime import datetime
     env_variables = _get_env_variables(mode=mode)
@@ -703,6 +730,7 @@ def get_fixtures(deploy_to=DEFAULT_DEPLOY_TO, mode=DEFAULT_MODE):
             local('mkdir -p %s' % (log_dir))
         with settings(hide('warnings')):
             get(remote_path="%s/%s" % (DJANGO_PROJECT_PATH, fixture_path), local_path="%s" % (log_dir))
+
 
 def get_logs(deploy_to=DEFAULT_DEPLOY_TO):
     """
@@ -722,8 +750,9 @@ def get_logs(deploy_to=DEFAULT_DEPLOY_TO):
         get(remote_path="/var/log/upstart/gunicorn.log", local_path="%s/gunicorn.log" % (log_dir))
         get(remote_path="/var/log/postgresql/postgresql-9.3-main.log", local_path="%s/psql.main.log" % (log_dir))
 
+
 def test():
-    deploy_to=DEFAULT_DEPLOY_TO
+    deploy_to = DEFAULT_DEPLOY_TO
     env_variables = _get_env_variables(mode='prod')
 
     print('\nMigrating database as user django')
@@ -738,6 +767,8 @@ def test():
             with settings(prompts={
                 "Login password for 'django': ": django_db_pass}):
                 run('python manage.py migrate --fake app')
+
+
 def all(deploy_to=DEFAULT_DEPLOY_TO, mode=DEFAULT_MODE):
     """Setup and reboot."""
     setup(deploy_to=deploy_to, mode=mode)

@@ -3,6 +3,6 @@ from app import views
 
 urlpatterns = patterns(
     '',
-    url(r'^$', views.IndexView.as_view(), name='index'),
-    url(r'stats/$', views.StatsView.as_view(), name='stats'),
+    url(r'^$', views.index, name='index'),
+    url(r'stats/$', views.stats, name='stats'),
 )

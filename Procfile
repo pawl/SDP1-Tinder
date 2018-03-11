@@ -1,1 +1,1 @@
-web: gunicorn wearhacks_website.wsgi --log-file -
+web: gunicorn sdp1_tinder.wsgi --log-file -

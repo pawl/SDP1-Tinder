@@ -33,17 +33,6 @@ SECRET_KEY = os.environ.get(
 )
 ########## END SECRET CONFIGURATION
 
-########## STRIPE
-LIVE_STRIPE_SECRET_KEY = os.environ.get('LIVE_STRIPE_SECRET_KEY',
-    'sk_provided_by_stripe')
-LIVE_STRIPE_PUBLIC_KEY = os.environ.get('LIVE_STRIPE_PUBLIC_KEY',
-    'pk_provided_by_stripe')
-
-TEST_STRIPE_SECRET_KEY = os.environ.get('TEST_STRIPE_SECRET_KEY',
-    'sk_test_provided_by_stripe')
-TEST_STRIPE_PUBLIC_KEY = os.environ.get('TEST_STRIPE_PUBLIC_KEY',
-    'pk_test_provided_by_stripe')
-
 # Comment out if you want a postgresql database backend
 # Otherwise, the default database backend is sqlite3
 #

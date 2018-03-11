@@ -145,11 +145,8 @@ TEMPLATE_LOADERS = (
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
 TEMPLATE_DIRS = (
     normpath(os.path.join(SITE_ROOT, 'templates')),
-    normpath(os.path.join(SITE_ROOT, 'static', 'javascripts')),
+    normpath(os.path.join(SITE_ROOT, 'static', 'js')),
 )
-
-CRISPY_TEMPLATE_PACK = 'bootstrap3'
-CRISPY_FAIL_SILENTLY = not DEBUG
 
 ########## END TEMPLATE CONFIGURATION
 
@@ -194,8 +191,6 @@ DJANGO_APPS = (
     # Third-party apps
     'rest_framework',
     'compressor',
-    'crispy_forms',
-    # 'djstripe'
     'djrill',
 )
 

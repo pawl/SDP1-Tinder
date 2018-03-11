@@ -21,15 +21,15 @@
         <!-- start jtinder container -->
         <div id="tinderslide">
             <ul>
-            {% for participant in participants %}
-                <li class="pane pane{{forloop.counter}}" data-participant-id="{{participant.id}}" data-name="{{participant.first_name}}">
-                    {% if participant.picture %}
-                    <div class="img" style="background:url('{% static participant.picture.url %}') no-repeat top center;"></div>
+            {% for image in images %}
+                <li class="pane pane{{ forloop.counter }} infinite-item" data-image-id="{{ image.id }}" data-name="{{ image.name }}">
+                    {% if image.file %}
+                    <div class="img" lazySrc="{% static image.file.url %}"></div>
                     {% else %}
                     <div class="img" style="background:#eee;"></div>
                     {% endif %}
                     <div class="info">
-                    <p class="text">{{participant.first_name}}, {{participant.age}}</p>
+                    <p class="text">{{ image.name }}</p>
                     <div class="friends"></div>
                     </div>
                     <div class="like"></div>
@@ -37,8 +37,6 @@
                 </li>
             {% endfor %}
             </ul>
-            <!-- <ul class="discarded">
-            </ul> -->
         </div>
         <!-- end jtinder container -->
     </div>
@@ -56,8 +54,8 @@
             <a href="#" class="like trigger fa fa-heart fa-2x"></a>
         </div>
     </div>
-    <div id="merci" class="hide">
-        <p> Merci d'avoir voté pour <span class="winner"></span> ! </p>
+    <div id="thankyou" class="hide">
+        <p> That's the last item <span class="winner"></span> ! </p>
     </div>
     </div>
 </body>
@@ -67,8 +65,6 @@
 {% block scripts %}
 
 {% compress js %}
-<!-- Your extra javascript here -->
-
 <script>
     var context = {
         swipeRightUrl: function(uid) {
@@ -82,11 +78,9 @@
         }
     };
 </script>
-<script src="{% static 'javascripts/jquery.transform2d.js' %}"></script>
-<script src="{% static 'javascripts/jquery.jTinder.js' %}"></script>
-<script src="{% static 'javascripts/main.js' %}"></script>
-
-
+<script src="{% static 'js/jquery.transform2d.js' %}"></script>
+<script src="{% static 'js/jquery.jTinder.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
 {% endcompress %}
 
 {% endblock %}

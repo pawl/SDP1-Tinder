@@ -15,7 +15,7 @@ mkdir -p locale
 echo "Make messages in app dir `pwd`"
 django-admin makemessages -x js -l fr --settings=${DJANGO_SETTINGS_MODULE}
 
-cd ../static/javascripts
+cd ../static/js
 echo "Make messages in dir `pwd`"
 django-admin makemessages -d djangojs -l fr --settings=${DJANGO_SETTINGS_MODULE}
 

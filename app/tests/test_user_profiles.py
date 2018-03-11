@@ -1,6 +1,6 @@
 from django.test import TestCase
-from app.models import UserProfile
+from app.models import Image
 
 
-class UserProfileTestCase(TestCase):
+class ImageTestCase(TestCase):
     pass

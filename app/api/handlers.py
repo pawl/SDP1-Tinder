@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseNotFound, Http404
+from django.http import HttpResponse, Http404
 
 from rest_framework.renderers import JSONRenderer
 
@@ -8,16 +8,8 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
 
-from app.models import UserProfile, SwipeAction, Event
-from app.serializers import UserProfileSerializer, SwipeActionSerializer
-
-
-def get_active_event():
-    active_events = Event.objects.filter(is_active=True)
-    if active_events.count() == 0:
-        raise Http404('<p>No event is active.</p>')
-    else:
-        return active_events.first()
+from app.models import Image, SwipeAction
+from app.serializers import ImageSerializer, SwipeActionSerializer
 
 
 class JSONResponse(HttpResponse):
@@ -34,28 +26,26 @@ class JSONResponse(HttpResponse):
 @api_view(('GET',))
 def api_root(request, format=None):
     return Response({
-        'users': reverse('user-list', request=request, format=format),
+        'images': reverse('image-list', request=request, format=format),
         'swipe-right': reverse('swipe-right', request=request, format=format),
         'swipe-left': reverse('swipe-left', request=request, format=format),
         'swipe-actions': reverse('swipe-action-list', request=request, format=format),
-        # 'events': reverse('event-list', request=request, format=format),
         # 'stats': reverse('stats', request=request, format=format)
     })
 
 
-class UserVoteStats(APIView):
+class ImageVoteStats(APIView):
     """
-    List stats pertaining to user votes
+    List stats pertaining to image votes
     """
 
     def get(self, request, format=None):
-        event = get_active_event()
-        users = event.participants.order_by('-num_votes', 'first_name').all()
+        images = Image.objects.all()
         series = []
-        for i, user in enumerate(users):
+        for i, image in enumerate(images):
             datapoint = {
-                'name': user.full_name(),
-                'y': user.get_num_votes(event=event)
+                'name': image.name,
+                'y': image.num_votes,
             }
             if i == 0:
                 datapoint['selected'] = True
@@ -64,41 +54,40 @@ class UserVoteStats(APIView):
         return Response({'series': series})
 
 
-class UserSwipeStats(APIView):
+class ImageSwipeStats(APIView):
     """
-    List stats pertaining to user votes
+    List stats pertaining to image votes
     """
 
     def get(self, request, is_percentage=False, format=None):
-        event = get_active_event()
-        users = event.participants.order_by('-num_right_swipes', 'num_left_swipes', 'first_name').all()
-        user_data = UserProfileSerializer(users, many=True).data
+        images = Image.objects.all()
+        image_data = ImageSerializer(images, many=True).data
         if is_percentage:
-            for user_obj, user_dict in zip(users, user_data):
-                user_dict['right'] = user_obj.get_pct_right_swipes(event=event)
-                user_dict['left'] = 100 - user_dict['right'] if user_dict['right'] else None
+            for image_obj, image_dict in zip(images, image_data):
+                image_dict['right'] = image_obj.get_pct_right_swipes()
+                image_dict['left'] = 100 - image_dict['right'] if image_dict['right'] else None
         else:
-            for user_obj, user_dict in zip(users, user_data):
-                user_dict['right'] = user_obj.get_num_right_swipes(event=event)
-                user_dict['left'] = user_obj.get_num_left_swipes(event=event)
+            for image_obj, image_dict in zip(images, image_data):
+                image_dict['right'] = image_obj.num_right_swipes
+                image_dict['left'] = image_obj.num_left_swipes
 
-        combined_user_data = [ (i, j) for i, j in zip(users, user_data)]
-        combined_user_data = sorted(combined_user_data, key=lambda k: -k[1]['right'])
+        combined_image_data = [(i, j) for i, j in zip(images, image_data)]
+        combined_image_data = sorted(combined_image_data, key=lambda k: -k[1]['right'])
 
         categories = []
         right = []
         left = []
-        for user_obj, user_dict in combined_user_data:
-            categories.append(user_obj.full_name())
-            right.append(user_dict['right'])
-            left.append(user_dict['left'])
+        for image_obj, image_dict in combined_image_data:
+            categories.append(image_obj.name)
+            right.append(image_dict['right'])
+            left.append(image_dict['left'])
         series = [{
-                'name': '% Right Swipes' if is_percentage else '# Right Swipes',
-                'data': right
-            }, {
-                'name': '% Left Swipes' if is_percentage else '# Left Swipes',
-                'data': left
-            }]
+            'name': '% Right Swipes' if is_percentage else '# Right Swipes',
+            'data': right
+        }, {
+            'name': '% Left Swipes' if is_percentage else '# Left Swipes',
+            'data': left
+        }]
         data = {
             'series': series,
             'categories': categories
@@ -106,73 +95,65 @@ class UserSwipeStats(APIView):
         return Response(data)
 
 
-class UserProfileList(APIView):
+class ImageList(APIView):
     """
-    List all users, or create a new user.
+    List all images, or create a new image.
     """
 
     def get(self, request, format=None):
-        users = UserProfile.objects.all()
-        serializer = UserProfileSerializer(users, many=True)
+        images = Image.objects.all()
+        serializer = ImageSerializer(images, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = UserProfileSerializer(data=request.data)
+        serializer = ImageSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserProfileDetail(APIView):
+class ImageDetail(APIView):
     """
     Retrieve, update or delete a snippet instance.
     """
 
     def get_object(self, pk):
         try:
-            return UserProfile.objects.get(pk=pk)
-        except UserProfile.DoesNotExist:
+            return Image.objects.get(pk=pk)
+        except Image.DoesNotExist:
             raise Http404
 
     def get(self, request, pk, format=None):
-        user = self.get_object(pk)
-        serializer = UserProfileSerializer(user)
+        image = self.get_object(pk)
+        serializer = ImageSerializer(image)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
-        user = self.get_object(pk)
-        serializer = UserProfileSerializer(user, data=request.data)
+        image = self.get_object(pk)
+        serializer = ImageSerializer(image, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
-        user = self.get_object(pk)
-        user.delete()
+        image = self.get_object(pk)
+        image.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class SwipeActionOnUser(APIView):
+class SwipeActionOnImage(APIView):
 
     def post(self, request, format=None, **kwargs):
-
         is_right = kwargs.get('is_right', None)
         is_vote = kwargs.get('is_vote', False)
-        user_pk = self.kwargs.get('uid', None)
-
-        active_events = Event.objects.filter(is_active=True)
-        if active_events.count() == 0:
-            return HttpResponseNotFound('<p>No event is active.</p>')
-        else:
-            active_event = active_events.first()
+        image_pk = self.kwargs.get('uid', None)
 
         swipe_action_data = {
-            'on_user': user_pk,
+            'on_image': image_pk,
             'is_right': is_right,
             'is_vote': is_vote,
-            'event': active_event.pk
         }
         serializer = SwipeActionSerializer(data=swipe_action_data)
         if serializer.is_valid():
@@ -183,15 +164,15 @@ class SwipeActionOnUser(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, format=None, **kwargs):
-        user_pk = self.kwargs.get('uid', None)
-        swipes = SwipeAction.objects.filter(on_user=user_pk, is_valid=True).all()
+        image_pk = self.kwargs.get('uid', None)
+        swipes = SwipeAction.objects.filter(on_image=image_pk, is_valid=True).all()
         serializer = SwipeActionSerializer(swipes, many=True)
         return Response(serializer.data)
 
 
 class SwipeActionList(APIView):
     """
-    List all users, or create a new user.
+    List all images, or create a new image.
     """
 
     def get(self, request, format=None):
@@ -212,9 +193,9 @@ class SwipeActionDetail(APIView):
     Retrieve, update or delete a snippet instance.
     """
 
-    def get_object(self, user_pk):
+    def get_object(self, image_pk):
         try:
-            return SwipeAction.objects.get(pk=user_pk)
+            return SwipeAction.objects.get(pk=image_pk)
         except SwipeAction.DoesNotExist:
             raise Http404
 
