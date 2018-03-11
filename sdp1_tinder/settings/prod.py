@@ -2,8 +2,6 @@
 
 from __future__ import absolute_import
 
-import sys
-
 from .common import SITE_NAME, DJANGO_ROOT
 import os
 

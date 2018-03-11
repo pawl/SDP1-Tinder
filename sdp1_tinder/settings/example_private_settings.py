@@ -11,15 +11,15 @@ from .common import SITE_NAME
 ENV_USER = 'root'
 
 # Remote hosts
-# The first item will be used as the url domain when making 
+# The first item will be used as the url domain when making
 # absolute urls (e.g. in the email confirmation)
-HOSTS = ( 
+HOSTS = (
     'YourHostIP', # e.g. '45.55.216.44'
     )
 
 ALLOWED_HOSTS = (
     '.example.com',  # Allow domain and subdomains
-    '.example.com.', 
+    '.example.com.',
     )
 
 SITE_NAME = 'Example Website'
@@ -44,13 +44,9 @@ TEST_STRIPE_SECRET_KEY = os.environ.get('TEST_STRIPE_SECRET_KEY',
 TEST_STRIPE_PUBLIC_KEY = os.environ.get('TEST_STRIPE_PUBLIC_KEY',
     'pk_test_provided_by_stripe')
 
-# Once your site is live, change this to True
-IS_STRIPE_LIVE = False
-########## END STRIPE
-
 # Comment out if you want a postgresql database backend
 # Otherwise, the default database backend is sqlite3
-# 
+#
 # ########## POSTGRES SETTINGS
 # DB_NAME = 'django'
 # DB_USER = 'django'
@@ -74,7 +70,7 @@ IS_STRIPE_LIVE = False
 
 ########## EMAIL / MANDRILL
 MANDRILL_API_KEY = "your_mandrill_api_key"
-EMAIL_BACKEND = 'djrill.mail.backends.djrill.DjrillBackend' 
+EMAIL_BACKEND = 'djrill.mail.backends.djrill.DjrillBackend'
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#email-host
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.mandrillapp.com')

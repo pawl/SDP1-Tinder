@@ -13,7 +13,7 @@ import os, pwd, sys
 merge_keys = ('DJANGO_APPS', 'MIDDLEWARE_CLASSES')
 
 def deep_update(from_dict, to_dict):
-    for (key, value) in from_dict.iteritems():
+    for (key, value) in from_dict.items():
         if key in to_dict.keys() and isinstance(to_dict[key], dict) and isinstance(value, dict):
             deep_update(value, to_dict[key])
         elif key in merge_keys:
@@ -35,10 +35,10 @@ current = __name__
 for module_name in modules:
     try:
         module = getattr(__import__(current, globals(), locals(), [module_name]), module_name)
-    except ImportError, e:
+    except ImportError as e:
         print('ERROR: Unable to import %s configuration: %s' % (module_name, e))
         raise
-    except AttributeError, e:
+    except AttributeError as e:
         if env == 'dev':
             print('WARNING: Unable to import %s dev configuration: does %s.py exist?' % (module_name, module_name))
         else:

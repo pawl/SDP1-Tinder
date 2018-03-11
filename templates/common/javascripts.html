@@ -20,9 +20,6 @@
 
 {% endcompress %}
 
-<!-- Internationalization -->
-<!-- <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script> -->
-
 {% compress js %}
 <script type="text/javascript" src="{% static 'javascripts/common.js' %}{% if debug %}?v=00001{% endif %}"></script>
 {% endcompress %}

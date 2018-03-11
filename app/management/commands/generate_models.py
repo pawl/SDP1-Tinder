@@ -39,7 +39,7 @@ class Command(BaseCommand):
                 create_user_profile()
         except ValueError:
             raise CommandError('Usage: you must pass a valid number.')
-        except Exception, e:
+        except Exception as e:
             print(e)
             raise CommandError('A vague error occured while generating notes')
 

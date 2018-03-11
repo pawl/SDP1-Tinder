@@ -102,11 +102,11 @@ COMPRESS_PRECOMPILERS = (
 
 COMPRESS_ROOT = normpath(os.path.join(SITE_ROOT, 'assets'))
 COMPRESS_CSS_FILTERS = (
-    'compressor.filters.css_default.CssAbsoluteFilter',  
+    'compressor.filters.css_default.CssAbsoluteFilter',
     'compressor.filters.cssmin.CSSMinFilter',
     )
 COMPRESS_JS_FILTERS = (
-    'compressor.filters.jsmin.JSMinFilter',  
+    'compressor.filters.jsmin.JSMinFilter',
     )
 
 ########## END STATIC FILE CONFIGURATION
@@ -129,7 +129,6 @@ FIXTURE_DIRS = (
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
     'django.core.context_processors.media',
     'django.core.context_processors.static',
     'django.core.context_processors.tz',
@@ -158,7 +157,7 @@ CRISPY_FAIL_SILENTLY = not DEBUG
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
+    # 'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -254,30 +253,15 @@ WSGI_APPLICATION = '%s.wsgi.application' % SITE_NAME
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Canada/Eastern'
+TIME_ZONE = 'America/Chicago'
 
-USE_I18N = True
+USE_I18N = False
 
-USE_L10N = True
+USE_L10N = False
 
 USE_TZ = True
-
-LOCALE_PATHS = (
-    os.path.join(SITE_ROOT, 'registration', 'locale'),
-    os.path.join(SITE_ROOT, 'templates', 'locale'),
-    # Note: django-admin makemessages won't find the path below, because it's in the static folder
-    # will have to cd in there and run the command there
-    os.path.join(SITE_ROOT, 'static', 'javascripts', 'locale'),
-)
-
-ugettext = lambda s: s
-LANGUAGES = (
-    ('en', ugettext('English')),
-    ('fr', ugettext('French')),
-)
-AVAILABLE_LANGUAGES = ('en', 'fr')
 ########## END INTERNATIONALIZATION
 
 ########## REST FRAMEWORK CONFIGURATION
@@ -332,7 +316,3 @@ LOGGING = {
         },
     },
 }
-
-########## STRIPE
-IS_STRIPE_LIVE = False
-########## END STRIPE

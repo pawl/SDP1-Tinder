@@ -35,8 +35,8 @@ try:
         DEFAULT_BRANCH,
         DJANGO_PASS)
 except ImportError, e:
-    print e
-    print 'Please update fab_config.py, see fab_config_example.py'
+    print(e)
+    print('Please update fab_config.py, see fab_config_example.py')
     sys.exit()
 
 print """
